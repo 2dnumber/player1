@@ -1,98 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movie city Member</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search and EmailJS</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-<div class="login-container">
-    
-    <form id="login-form" onsubmit="return validateForm()">
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit">Login</button>
-    </form>
-</div>
+    <nav>
+        <h1>Search and Choose Number</h1>
+        <a href="history.html" style="color:white; margin-left: 50%;">History</a>
 
-<script>
-function validateForm() {
-    var username = document.getElementById("username").value;
-    var password = document.getElementById("password").value;
+    </nav>
+    <div class="container" id="searchContainer">
+        <input type="text" id="searchBar" placeholder="Search for a number...">
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Number</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody id="results"></tbody>
+        </table>
+    </div>
+    <div class="container" id="detailsContainer" style="display: none;">
+        <button id="backBtn">Back</button>
+        <img id="selectedPhoto" src="" alt="">
+        <p id="selectedNumber"></p>
+        <p id="selectedAmount"></p>
+        <input type="text" id="inputAmount" placeholder="Enter Kpayname" required>
+        <input type="text" id="inputTime" placeholder="transfer number " required>
+        <input type="text" id="inputDate" placeholder="amount$" required>
+        <div class="button">
+        <button id="submitBtn">Send </button>
+      </div>
+    </div>
 
-    // Simple validation for demonstration purposes
-    if (username === "player1" && password === "ABC123") {
-        alert("Login successful!");
-        window.location.href = "player1.html"; // Redirect to the next page
-        return false; // Prevent form submission
-    } else {
-        alert("Invalid username or password. Please try again.");
-        return false; // Prevent form submission
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+    emailjs.init('80uAcGkKQNbay0xpB'); // Replace with your EmailJS user ID
+
+    const searchBar = document.getElementById('searchBar');
+    const results = document.getElementById('results');
+    const detailsContainer = document.getElementById('detailsContainer');
+    const searchContainer = document.getElementById('searchContainer');
+    const backBtn = document.getElementById('backBtn');
+    const selectedPhoto = document.getElementById('selectedPhoto');
+    const selectedNumber = document.getElementById('selectedNumber');
+    const selectedAmount = document.getElementById('selectedAmount');
+    const inputAmount = document.getElementById('inputAmount');
+    const inputTime = document.getElementById('inputTime');
+    const inputDate = document.getElementById('inputDate');
+    const submitBtn = document.getElementById('submitBtn');
+    const history = document.getElementById('history');
+
+    // Sample data with photos, numbers, and initial amounts
+    const numbers = [
+    { number: '545 / နဂါး', name: 'နဂါး', photo: 'dragon.jpg', name: 'နဂါး', amount: '1000MMK' },
+        { number: '503 / သိုင်းသမား', name: 'သိုင်းသမား', photo: 'thine ta mar.jpg', amount: '' },
+        { number: '502 / ဓားဆောင်သူ', name: 'ဓားဆောင်သူ', photo: 'Dar saund thu.jpg', amount: '' },
+        { number: '515 / ဥဒေါင်း', name: 'ဥဒေါင်း', photo: 'u daung.jpg', amount: '' },
+        { number: '539 / ခြင်္သေ့', name: 'ခြင်္သေ့', photo: 'lion.jpg', amount: '' },
+        { number: '541 / သိမ်းငှက်', name: 'သိမ်းငှက်', photo: 'thainbird.jpg', amount: '' },
+        { number: '508 / ကျားခေါင်း', name: 'ကျားခေါင်း', photo: 'digerhead.jpg', amount: '' },
+        { number: '507 / ဗျိုင်း', name: 'ဗျိုင်း', photo: 'pyain.jpg', amount: '' },
+        { number: '537 / လူရည်ချွန်', name: 'လူရည်ချွန်', photo: 'luyaychon.jpg', amount: '' },
+        { number: '532 / ဥသြငှက်', name: 'ဥသြငှက်', photo: 'oakallnyat.jpg', amount: '' },
+        { number: '527 / ဖိုးမုတ်ဆိတ်', name: 'ဖိုးမုတ်ဆိတ်', photo: 'phoemotesite.jpg', amount: '' },
+        { number: '519 / စာရင်းကိုင်', name: 'စာရင်းကိုင်', photo: 'saryinkyain.jpg', amount: '' },
+        { number: '529 / ဆတ်', name: 'ဆတ်', photo: 'sat.jpg', amount: '' },
+        { number: '546 / ငုံး', name: 'ငုံး', photo: 'nyone.jpg', amount: '' },
+        { number: '504 / မြင်း', name: 'မြင်း', photo: 'myinn.jpg', amount: '' },
+        { number: '524 / လွေးငှက်', name: 'လွေးငှက်', photo: 'lawybird.jpg', amount: '' },
+        { number: '538 / နွား', name: 'နွား', photo: 'cow.jpg', amount: '' },
+        { number: '528 / လားလူမျိုး', name: 'လားလူမျိုး', photo: 'larhulumyo.jpg', amount: '' },
+        { number: '512 / ဓားကိုင်သူ', name: 'ဓားကိုင်သူ', photo: 'tharkointhu.jpg', amount: '' },
+        { number: '522 / ကျီး', name: 'ကျီး', photo: 'gyee.jpg', amount: '' },
+        { number: '543 / ရွာဆော်', name: 'ရွာဆော်', photo: 'ywarsaw.jpg', amount: '' },
+        { number: '520 / ဂျိူးငှက်', name: 'ဂျိူးငှက်', photo: 'joe.jpg', amount: '' },
+        { number: '534 / ၀က် ', name: '၀က်', photo: 'watt.jpg', amount: '' },
+        { number: '516 / အောက်ချင်းငှက်', name: 'အောက်ချင်းငှက်', photo: 'outchinbird.jpg', amount: '' },
+        { number: '535 / တားမြစ်သူ', name: 'တားမြစ်သူ', photo: 'tarmyitthu.jpg', amount: '' },
+        { number: '540 / ဘီလုံးငှက်ငယ်', name: 'ဘီလုံးငှက်ငယ်', photo: 'beelonebirdnge.jpg', amount: '' },
+        { number: '511 / ကြိုဆိုသူ', name: 'ကြိုဆိုသူ', photo: 'kyosoethu.jpg', amount: '' },
+        { number: '518 / ယင်းနက်လူမျိုး', name: 'ယင်းနက်လူမျိုး', photo: 'yinnatlumyo.jpg', amount: '' },
+        { number: '513 / ၀ံပုလွေ', name: '၀ံပုလွေ', photo: 'wonpalway.jpg', amount: '' },
+        { number: '549 / မုဆိူး', name: 'မုဆိူး', photo: 'motesoe.jpg', amount: '' },
+        { number: '544 / လေးသမား', name: 'လေးသမား', photo: 'laytamar.jpg', amount: '' },
+        { number: '510 / နာဂလူမျိုး', name: 'နာဂလူမျိုး', photo: 'nargalumyo.jpg', amount: '' },
+        { number: '536 / ရခိုင်လူမျိုး', name: 'ရခိုင်လူမျိုး', photo: 'yakhainlumyo.jpg', amount: '' },
+        { number: '523 / ဖား', name: 'ဖား', photo: 'par.jpg', amount: '' },
+        { number: '525 / မင်းသား', name: 'မင်းသား', photo: 'mintar.jpg', amount: '' },
+        { number: '533 / အလှမယ်', name: 'အလှမယ်', photo: 'alamal.jpg', amount: '' },
+        { number: '509 / ငါးမန်း', name: 'ငါးမန်း', photo: 'fishman.jpg', amount: '' },
+        // Add more entries as needed
+    ];
+
+    searchBar.addEventListener('input', () => {
+        const query = searchBar.value.toLowerCase();
+        results.innerHTML = '';
+
+        numbers.filter(item => item.number.includes(query))
+               .forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td><img src="${item.photo}" alt="${item.name}"></td><td>${item.number}</td><td>${item.amount}</td>`;
+                    tr.addEventListener('click', () => handleChoice(item));
+                    results.appendChild(tr);
+               });
+    });
+
+    function handleChoice(item) {
+        searchContainer.style.display = 'none';
+        detailsContainer.style.display = 'block';
+        selectedPhoto.src = item.photo;
+        selectedNumber.textContent = `Number: ${item.number}`;
+        selectedAmount.textContent = `Initial Amount: ${item.amount}`;
+        submitBtn.onclick = () => handleSubmit(item);
     }
-}
-</script>
 
+    backBtn.addEventListener('click', () => {
+        detailsContainer.style.display = 'none';
+        searchContainer.style.display = 'block';
+    });
+
+    function handleSubmit(item) {
+        const amount = inputAmount.value;
+        const time = inputTime.value;
+        const day = inputDate.value;
+
+        if (amount && time && day) {
+            const userName = prompt("Enter your name:");
+            
+            if (userName) {
+                const emailParams = {
+                    from_name: userName,
+                    to_name: 'recipient@example.com', // Replace with recipient email
+                    message: `User ${userName} selected number ${item.number} with initial amount ${item.amount}, kpay name ${amount}  transfer number ${time} amount$ ${day}.`
+                };
+
+                emailjs.send('default_service', 'template_099mw1b', emailParams) // Replace with your service ID and template ID
+                       .then(() => {
+                           alert('Email sent successfully!');
+                           saveHistory(item, userName, amount, time, day);
+                       })
+                       
+            }
+        }
+    }
+
+    function saveHistory(item, userName, amount, time, day) {
+        const historyItem = {
+            number: item.number,
+            name: item.name,
+            initialAmount: item.amount,
+            amount: amount,
+            time: time,
+            day: day,
+            user: userName
+        };
+        let historyData = JSON.parse(localStorage.getItem('history')) || [];
+        historyData.push(historyItem);
+        localStorage.setItem('history', JSON.stringify(historyData));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        history.innerHTML = '';
+        const historyData = JSON.parse(localStorage.getItem('history')) || [];
+        historyData.forEach(item => {
+            const div = document.createElement('div');
+            div.classList.add('history-item');
+            div.innerText = `Number: ${item.number}, Name: ${item.name}, Initial Amount: ${item.initialAmount}, Amount: ${item.amount}, Time: ${item.time}, Day: ${item.day}, User: ${item.user}`;
+            history.appendChild(div);
+        });
+    }
+
+    renderHistory();
+});
+
+    </script>
 </body>
 <style>
   body {
     font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    margin: 0;
-    padding: 0;
 }
 
-.login-container {
-    width: 300px;
-    margin: 100px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
+nav {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
     text-align: center;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+#searchBar {
+    width: 100%;
+    padding: 10px;
     margin-bottom: 20px;
 }
 
-.form-group {
+table {
+    width: 100%;
+    border-collapse: collapse;
     margin-bottom: 20px;
 }
 
-label {
-    display: block;
-    margin-bottom: 5px;
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
 }
 
-input[type="text"],
-input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+th {
+    background-color: #f2f2f2;
 }
 
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    border: none;
-    color: #fff;
+tbody tr:hover {
+    background-color: #f1f1f1;
     cursor: pointer;
-    border-radius: 3px;
 }
 
-button:hover {
-    background-color: #0056b3;
+#results img {
+    width: 100px;
+    height: 100px;
 }
 
+#detailsContainer {
+    text-align: left;
+}
+
+#detailsContainer img {
+    width: 50%;
+    height: 50%;
+    justify-content: center;
+    display: grid;
+    align-items: center;
+}
+
+#history {
+    margin-top: 20px;
+}
+
+.history-item {
+    margin: 5px 0;
+    padding: 10px;
+    background: #e0e0e0;
+    border-radius: 5px;
+}
+#inputAmount{
+  margin-top: 20px;
+  height: 30x;
+  width: 100%;
+  color: whitesmoke;
+  font-size: 20px;
+}
+#inputTime{
+ margin-top: 25px;
+  height: 30x;
+  width: 100%;
+  color: whitesmoke;
+  font-size: 20px;
+}
+#inputDate{
+  margin-top: 25px;
+  height: 30x;
+  width: 100%;
+  color: whitesmoke;
+  font-size: 20px;
+
+}
+#submitBtn{
+  margin-top: 25px;
+  height: 30x;
+  width: 100%;
+  color: whitesmoke;
+  font-size: 20px;
+  background-color: #4535C1;
+  border-radius: 20px;
+}
 </style>
 </html>
